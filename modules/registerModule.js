@@ -1,17 +1,18 @@
-const  User = require('../model/User');
 const Joi = require('joi');
-const  bcrypt = require('bcrypt');
+const User = require('../model/User');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res, next) => {
     const schema = Joi.object({
         username: Joi.string().min(4).max(25).required(),
         email: Joi.string().min(6).max(50).email().required(),
-        fname: Joi.string().min(3).max(50).required(),
-        lname: Joi.string().min(3).max(50).required(),
-        phone: Joi.string().pattern(/^[0-9]+$/).required(),
+        first_name: Joi.string().min(3).max(50).required(),
+        last_name: Joi.string().min(3).max(50).required(),
+        number: Joi.string().pattern(/^[0-9]+$/).required(),
         address: Joi.string().min(3).max(20),
-        password: Joi.string().min(4).max(15).required()
+        password: Joi.string().min(4).max(15).required(),
+        savedProduct: Joi.object({})
     })
 
     var {error} = await schema.validate(req.body);
@@ -26,11 +27,12 @@ exports.register = async (req, res, next) => {
     const user = new User({
         username:req.body.username,
         email:req.body.email,
-        fname:req.body.fname,
-        lname:req.body.lname,
-        phone:req.body.phone,
+        first_name:req.body.first_name,
+        last_name:req.body.last_name,
+        number:req.body.number,
         address:req.body.address,
-        password:req.body.password
+        password:req.body.password,
+        savedProduct:req.body.savedProduct
     })
 
     var response = await user.save();
@@ -38,18 +40,6 @@ exports.register = async (req, res, next) => {
 
 }
 
-exports.getUser = async (req, res, next) => {
-    var response = await User.find();
-    res.send(response);
-}
-
-// exports.updateUser = async (req, res, next) => {
-    // const {userId} = req.params;
-    // var response = await User.findByIdAndUpdate(userId,{
-    //     userQuanttity : req.body.userQuanttity
-    // },{new : true})
-    // res.send(response);
-// }
 
 exports.login = async (req, res, next) => {
     const schema = Joi.object({
@@ -59,21 +49,23 @@ exports.login = async (req, res, next) => {
     
     var {error} = await schema.validate(req.body);
     if (error) return res.status(400).send({msg : error.details[0].message});
+    console.log( User);
 
     var existUser = await User.findOne({"email": req.body.email}).exec();
     if(!existUser) return res.status(400).send({msg : "Email not reqistered"});
     var user={};
     user.username = existUser.username;
-    user.fname = existUser.fname;
-    user.lname = existUser.lname;
+    user.first_name = existUser.first_name;
+    user.last_name = existUser.last_name;
     user.email = existUser.email;
-    user.phone = existUser.phone;
-    user._id = req.body._id;
+    user.number = existUser.number;
+    user._id = existUser._id;
+    user.savedProduct=existUser.savedProduct;
     
 
     var isValid = await bcrypt.compare(req.body.password, existUser.password);
     if(!isValid) return res.status(400).send({msg : "Password doesn't match."});
 
-    var token = jwt.sign({user}, 'SWERA', {expiresIn: '1h'});
+    var token = jwt.sign({user}, 'SWERA', {expiresIn: '2h'});
     res.send(token);
 }

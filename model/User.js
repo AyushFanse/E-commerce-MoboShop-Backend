@@ -7,11 +7,11 @@ const userSchema = new Schema({
         minLength: 5,
         required : true
     },
-    fname:{
+    first_name:{
         type : String,
         required : true
     },
-    lname:{
+    last_name:{
         type : String,
         required : true
     },
@@ -23,7 +23,7 @@ const userSchema = new Schema({
         type : String,
         required : true,
     },
-    phone:{
+    number:{
         type : String,
         minLength: 10,
         maxLength: 10,
@@ -33,7 +33,8 @@ const userSchema = new Schema({
         type : String,
         required : true,
         minLength: 5
-    }
+    },
+    savedProduct:[Object]
 })
 
 

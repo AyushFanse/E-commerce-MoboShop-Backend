@@ -8,5 +8,3 @@ exports.connect = () => {
         process.exit();
     }
 }
-
-// mongodb://localhost:27017/MyShop
