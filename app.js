@@ -10,7 +10,6 @@ var productsRouter = require('./routes/product');
 var brandRouter = require('./routes/brand');
 var registerRouter = require('./routes/register');
 var cors = require('cors');
-
 var app = express();
 
 

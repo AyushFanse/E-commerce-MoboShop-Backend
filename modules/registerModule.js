@@ -10,7 +10,7 @@ exports.register = async (req, res, next) => {
         first_name: Joi.string().min(3).max(50).required(),
         last_name: Joi.string().min(3).max(50).required(),
         number: Joi.string().pattern(/^[0-9]+$/).required(),
-        address: Joi.string().min(3).max(20),
+        address: Joi.string().min(3).max(20).required(),
         password: Joi.string().min(4).max(15).required(),
         savedProduct: Joi.object({})
     })
@@ -19,7 +19,13 @@ exports.register = async (req, res, next) => {
     if (error) return res.status(400).send({msg : error.details[0].message});
 
     var existUser = await User.findOne({"email": req.body.email}).exec();
-    if(existUser) return res.status(200).send({msg : "User already exists."});
+    if(existUser) return res.status(200).send({msg : "Email already exists.", status : "error"});
+
+    var existUser = await User.findOne({"username": req.body.username}).exec();
+    if(existUser) return res.status(200).send({msg : "Username already exists.", status : "error"});
+
+    var existUser = await User.findOne({"number": req.body.number}).exec();
+    if(existUser) return res.status(200).send({msg : "Number already exists.", status : "error"});
 
     const salt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(req.body.password, salt);
@@ -34,10 +40,12 @@ exports.register = async (req, res, next) => {
         password:req.body.password,
         savedProduct:req.body.savedProduct
     })
-
-    var response = await user.save();
-    res.send(response);
-
+    try{
+        var response = await user.save();
+        res.status(200).send({msg : "You Have Successfully Registered Your Account..!", status : "success"}).send(response);
+    }catch(err){
+        res.status(400).send(err);
+    }
 }
 
 
@@ -52,7 +60,8 @@ exports.login = async (req, res, next) => {
     console.log( User);
 
     var existUser = await User.findOne({"email": req.body.email}).exec();
-    if(!existUser) return res.status(400).send({msg : "Email not reqistered"});
+    if(!existUser) return res.status(200).send({msg : "Email not reqistered", status : "error"});
+    
     var user={};
     user.username = existUser.username;
     user.first_name = existUser.first_name;
@@ -64,8 +73,8 @@ exports.login = async (req, res, next) => {
     
 
     var isValid = await bcrypt.compare(req.body.password, existUser.password);
-    if(!isValid) return res.status(400).send({msg : "Password doesn't match."});
+    if(!isValid) return res.status(200).send({msg : "Password doesn't match.", status : "error"});
 
     var token = jwt.sign({user}, 'SWERA', {expiresIn: '2h'});
-    res.send(token);
+    res.send({userToken : token, status : "success"});
 }
