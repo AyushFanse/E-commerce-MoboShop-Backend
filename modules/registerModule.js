@@ -5,13 +5,13 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res, next) => {
     const schema = Joi.object({
-        username: Joi.string().min(4).max(25).required(),
-        email: Joi.string().min(6).max(50).email().required(),
         first_name: Joi.string().min(3).max(50).required(),
         last_name: Joi.string().min(3).max(50).required(),
-        number: Joi.string().pattern(/^[0-9]+$/).required(),
-        address: Joi.string().min(3).max(20).required(),
+        username: Joi.string().min(4).max(25).required(),
+        email: Joi.string().min(6).max(50).email().required(),
+        number: Joi.string().min(10).max(15).pattern(/^[0-9]+$/).required(),
         password: Joi.string().min(4).max(15).required(),
+        address: Joi.string().min(3).max(20).required(),
         savedProduct: Joi.object({})
     })
 
@@ -31,13 +31,13 @@ exports.register = async (req, res, next) => {
     req.body.password = await bcrypt.hash(req.body.password, salt);
     
     const user = new User({
-        username:req.body.username,
-        email:req.body.email,
         first_name:req.body.first_name,
         last_name:req.body.last_name,
+        username:req.body.username,
+        email:req.body.email,
         number:req.body.number,
-        address:req.body.address,
         password:req.body.password,
+        address:req.body.address,
         savedProduct:req.body.savedProduct
     })
     try{
