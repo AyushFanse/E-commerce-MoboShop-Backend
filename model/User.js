@@ -34,7 +34,15 @@ const userSchema = new Schema({
         required : true,
         minLength: 5
     },
-    savedProduct:[Object]
+    savedProduct:[Object],
+    id:{
+        type : String,
+        required : true
+    },
+    post:{
+        type : String,
+        required : true
+    }
 })
 
 

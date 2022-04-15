@@ -12,7 +12,9 @@ exports.register = async (req, res, next) => {
         number: Joi.string().min(10).max(15).pattern(/^[0-9]+$/).required(),
         password: Joi.string().min(4).max(15).required(),
         address: Joi.string().min(3).max(20).required(),
-        savedProduct: Joi.object({})
+        savedProduct: Joi.object({}),
+        post:Joi.string().valid('Admin', 'User'),
+        id:Joi.string()
     })
 
     var {error} = await schema.validate(req.body);
@@ -29,8 +31,11 @@ exports.register = async (req, res, next) => {
 
     const salt = await bcrypt.genSalt(10);
     req.body.password = await bcrypt.hash(req.body.password, salt);
+
+    const size = await User.find();
     
     const user = new User({
+        id:size.length + 1,
         first_name:req.body.first_name,
         last_name:req.body.last_name,
         username:req.body.username,
@@ -38,7 +43,8 @@ exports.register = async (req, res, next) => {
         number:req.body.number,
         password:req.body.password,
         address:req.body.address,
-        savedProduct:req.body.savedProduct
+        savedProduct:req.body.savedProduct,
+        post:req.body.post || "User",
     })
     try{
         var response = await user.save();
@@ -48,6 +54,7 @@ exports.register = async (req, res, next) => {
     }
 }
 
+/*--------------------------------------* LOGIN *--------------------------------------*/
 
 exports.login = async (req, res, next) => {
     const schema = Joi.object({
@@ -70,6 +77,7 @@ exports.login = async (req, res, next) => {
     user.number = existUser.number;
     user._id = existUser._id;
     user.savedProduct=existUser.savedProduct;
+    user.post=existUser.post;
     
 
     var isValid = await bcrypt.compare(req.body.password, existUser.password);

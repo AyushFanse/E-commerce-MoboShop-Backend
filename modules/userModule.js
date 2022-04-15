@@ -15,28 +15,50 @@ exports.getUser = async(req, res, next)=>{
   };
 
 
+///////////////////////////* Get User By Id From DataBase *////////////////////////////
+
+exports.getUserById = async(req, res, next)=>{
+  try{
+    var response = await User.findById(req.params.userId);
+    res.status(200).send(response);
+  }catch(err){
+    res.status(400).send(err);
+}
+};
+
+
 ///////////////////////////* Update User By Id *////////////////////////////
 
   exports.updateUser =async (req, res, next)=>{
 
     try{
-      let password = '';
-        if(req.body.password){
-          const salt = await bcrypt.genSalt(10);
-          password = bcrypt.hash(req.body.password, salt);
-        }else{
-          password = req.body.password
-        }
-      var response = await User.findByIdAndUpdate(req.params.userId,{
-        first_name:req.body.first_name,
-        last_name:req.body.last_name,
-        username:req.body.username,
-        email:req.body.email,
-        number:req.body.number,
-        address:req.body.address,
-        password:password
+      const user = await User.findById(req.params.userId);      
+      const data = {
+        first_name: req.body.first_name || user.first_name,
+        last_name: req.body.last_name || user.last_name,
+        username: req.body.username || user.username,
+        number: req.body.number || user.number,
+        address: req.body.address || user.address,
+        post: req.body.post || user.post,
+        email: req.body.email || user.email
+      };
+      const response = await User.findByIdAndUpdate(req.params.userId, data, { new: true });
+      res.status(200).json({msg: 'Your Account has been updated succeccfully...', status:'success' });
+    }catch(err){
+      res.status(400).send(err);
+  }
+  };
+
+  ///////////////////////////* Update User By Id *////////////////////////////
+
+  exports.updatePassword =async (req, res, next)=>{
+
+    try{
+      const newPassword = await bcrypt.hash(req.body.password, 10);
+      const response = await User.findByIdAndUpdate(req.params.userId,{
+        password:newPassword
       },{new : true})
-      res.status(200).send(response);
+      res.status(200).json({data : response });
     }catch(err){
       res.status(400).send(err);
   }
@@ -47,8 +69,8 @@ exports.getUser = async(req, res, next)=>{
 
   exports.deleteUser =async (req, res, next) => {
     try{
-      var response = await User.findByIdAndRemove(req.params.userId);
-    res.status(200).send(response);
+      await User.findByIdAndRemove(req.params.userId);
+      res.status(200).json({msg: 'Your Account has been deleted succeccfully...', status:'success' });
   }catch(err){
     res.status(400).send(err);
   }

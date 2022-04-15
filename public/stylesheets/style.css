@@ -1,6 +1,6 @@
 body {
   height: 100%;
-  padding: 15% 0 0 0;
+  padding: 14% 0 0 0;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   background: #c3ff00;
 }
@@ -20,6 +20,6 @@ p{
 a{
   height: auto;
   display: flex;
-  font-size: 0.8rem;
+  font-size: 1.8rem;
   justify-content: space-around;
 }
