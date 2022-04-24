@@ -82,7 +82,7 @@ exports.getUserById = async(req, res, next)=>{
  exports.SaveProduct = async (req, res, next) => {
   try{
       let product = await User.findByIdAndUpdate(req.params.userId,{            
-          $push:{saved: req.body.saved}
+          $push:{savedProduct: req.body.savedProduct}
           },{new : true})
       res.status(200).send(product);
   }catch(error){
@@ -96,7 +96,7 @@ exports.getUserById = async(req, res, next)=>{
  exports.DeleteSavedProduct = async (req, res, next) => {
   try{
       let product = await User.findByIdAndUpdate(req.params.userId,{            
-          $pull:{saved: req.body.saved}
+          $pull:{savedProduct: req.body.savedProduct}
           },{new : true})
       res.status(200).send(product);
   }catch(error){
