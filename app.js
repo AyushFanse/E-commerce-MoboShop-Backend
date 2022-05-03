@@ -60,7 +60,7 @@ app.use(function(err, req, res, next) {
 
 //----------------------------* Setting Port *----------------------------//
 
-var port =process.env.PORT || '3001';
+var port =process.env.PORT || '3008';
 app.set('port', port);
 app.listen(port, () => console.log(`Server is stated on http://localhost:${port}`));
 
