@@ -13,43 +13,44 @@ exports.register = async (req, res, next) => {
         password: Joi.string().min(4).max(15).required(),
         address: Joi.string().min(3).max(20).required(),
         savedProduct: Joi.object({}),
-        post:Joi.string().valid('Admin', 'User'),
-        id:Joi.string()
+        post: Joi.string().valid('Admin', 'User'),
+        id: Joi.string()
     })
 
-    var {error} = await schema.validate(req.body);
-    if (error) return res.status(400).send({msg : error.details[0].message});
+    try {
 
-    var existUser = await User.findOne({"email": req.body.email}).exec();
-    if(existUser) return res.status(200).send({msg : "Email already exists.", status : "error"});
+        var { error } = await schema.validate(req.body);
+        if (error) return res.status(400).send({ msg: error.details[0].message });
 
-    var existUser = await User.findOne({"username": req.body.username}).exec();
-    if(existUser) return res.status(200).send({msg : "Username already exists.", status : "error"});
+        var existUser = await User.findOne({ "email": req.body.email }).exec();
+        if (existUser) return res.status(400).send({ msg: "Email already exists.", status: "error" });
 
-    var existUser = await User.findOne({"number": req.body.number}).exec();
-    if(existUser) return res.status(200).send({msg : "Number already exists.", status : "error"});
+        var existUsername = await User.findOne({ "username": req.body.username }).exec();
+        if (existUsername) return res.status(400).send({ msg: "Username already exists.", status: "error" });
 
-    const salt = await bcrypt.genSalt(10);
-    req.body.password = await bcrypt.hash(req.body.password, salt);
+        var existNumber = await User.findOne({ "number": req.body.number }).exec();
+        if (existNumber) return res.status(400).send({ msg: "Number already exists.", status: "error" });
 
-    const size = await User.find();
-    
-    const user = new User({
-        id:size.length + 1,
-        first_name:req.body.first_name,
-        last_name:req.body.last_name,
-        username:req.body.username,
-        email:req.body.email,
-        number:req.body.number,
-        password:req.body.password,
-        address:req.body.address,
-        savedProduct:req.body.savedProduct,
-        post:req.body.post || "User",
-    })
-    try{
+        const salt = await bcrypt.genSalt(10);
+        req.body.password = await bcrypt.hash(req.body.password, salt);
+
+        const size = await User.find();
+
+        const user = new User({
+            id: size.length + 1,
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            username: req.body.username,
+            email: req.body.email,
+            number: req.body.number,
+            password: req.body.password,
+            address: req.body.address,
+            savedProduct: req.body.savedProduct,
+            post: req.body.post || "User",
+        })
         var response = await user.save();
-        res.status(200).send({msg : "You Have Successfully Registered Your Account..!", status : "success"}).send(response);
-    }catch(err){
+        res.status(200).send({ msg: "You Have Successfully Registered Your Account..!", status: "success" }).send(response);
+    } catch (err) {
         res.status(400).send(err);
     }
 }
@@ -61,28 +62,32 @@ exports.login = async (req, res, next) => {
         email: Joi.string().min(6).max(50).email().required(),
         password: Joi.string().min(4).max(15).required()
     })
-    
-    var {error} = await schema.validate(req.body);
-    if (error) return res.status(400).send({msg : error.details[0].message});
-    console.log( User);
 
-    var existUser = await User.findOne({"email": req.body.email}).exec();
-    if(!existUser) return res.status(200).send({msg : "Email not reqistered", status : "error"});
-    
-    var user={};
-    user.username = existUser.username;
-    user.first_name = existUser.first_name;
-    user.last_name = existUser.last_name;
-    user.email = existUser.email;
-    user.number = existUser.number;
-    user._id = existUser._id;
-    user.savedProduct=existUser.savedProduct;
-    user.post=existUser.post;
-    
+    try {
+        var { error } = await schema.validate(req.body);
+        if (error) return res.status(400).send({ msg: error.details[0].message });
+        console.log(User);
 
-    var isValid = await bcrypt.compare(req.body.password, existUser.password);
-    if(!isValid) return res.status(200).send({msg : "Password doesn't match.", status : "error"});
+        var existUser = await User.findOne({ "email": req.body.email }).exec();
+        if (!existUser) return res.status(200).send({ msg: "Email not reqistered", status: "error" });
 
-    var token = jwt.sign({user}, 'SWERA', {expiresIn: '2h'});
-    res.send({userToken : token, status : "success"});
+        var user = {};
+        user.username = existUser.username;
+        user.first_name = existUser.first_name;
+        user.last_name = existUser.last_name;
+        user.email = existUser.email;
+        user.number = existUser.number;
+        user._id = existUser._id;
+        user.savedProduct = existUser.savedProduct;
+        user.post = existUser.post;
+
+
+        var isValid = await bcrypt.compare(req.body.password, existUser.password);
+        if (!isValid) return res.status(200).send({ msg: "Password doesn't match.", status: "error" });
+
+        var token = jwt.sign({ user }, 'SWERA', { expiresIn: '2h' });
+        res.send({ userToken: token, status: "success" });
+    } catch (err) {
+        res.status(400).send(err);
+    }
 }

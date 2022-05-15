@@ -12,5 +12,4 @@ cloudinary.config({
   ssl_detected: true
 });
 
-console.log('cloud')
 module.exports = cloudinary;

@@ -1,6 +1,6 @@
 const express = require('express');
-const User = require('../modules/userModule');
 const router = express.Router();
+const User = require('../modules/userModule');
 
 /* GET users listing. */
 router.get('/getuser', User.getUser);
